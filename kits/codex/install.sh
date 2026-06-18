@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLUGIN_NAME="spec-first-kit"
+PLUGIN_NAME="telos"
 SRC="$(cd "$(dirname "$0")/plugins/$PLUGIN_NAME" && pwd)"
 DEST="$HOME/plugins/$PLUGIN_NAME"
 MARKETPLACE="$HOME/.agents/plugins/marketplace.json"

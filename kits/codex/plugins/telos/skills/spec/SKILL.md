@@ -18,7 +18,7 @@ Treat the text after `$spec` as the initial task input.
 5. Continue until acceptance criteria are measurable and open questions are resolved.
 6. Create `SPEC.md` using `assets/SPEC.template.md`.
 7. Set status to `frozen` only when no open questions remain.
-8. If the user wants a quantitative check, run `python3 ~/plugins/spec-first-kit/scripts/ambiguity_score.py SPEC.md`.
+8. If the user wants a quantitative check, run `python3 ~/plugins/telos/scripts/ambiguity_score.py SPEC.md`.
 
 ## Rules
 

@@ -4,9 +4,9 @@ set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")/.claude" && pwd)"
 DEST="$HOME/.claude"
-MANIFEST="$DEST/.spec-first-kit-manifest"
-CLAUDE_MARKER_BEGIN="<!-- ▼ spec-first-kit-begin -->"
-CLAUDE_MARKER_END="<!-- ▲ spec-first-kit-end -->"
+MANIFEST="$DEST/.telos-manifest"
+CLAUDE_MARKER_BEGIN="<!-- ▼ telos-begin -->"
+CLAUDE_MARKER_END="<!-- ▲ telos-end -->"
 
 # ── 1. 이전 설치 파일 제거 (매니페스트 기반) ────────────────────────────────
 if [ -f "$MANIFEST" ]; then
@@ -46,7 +46,7 @@ if [ -f "$DEST/CLAUDE.md" ]; then
   # 이전 블록 제거 (마커가 있으면)
   if grep -q "$CLAUDE_MARKER_BEGIN" "$DEST/CLAUDE.md"; then
     sed -i '' "/$CLAUDE_MARKER_BEGIN/,/$CLAUDE_MARKER_END/d" "$DEST/CLAUDE.md"
-    echo "• 기존 spec-first-kit 블록 교체"
+    echo "• 기존 Telos 블록 교체"
   fi
   # 새 블록 append
   {

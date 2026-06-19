@@ -24,14 +24,12 @@
 반복    →  실패한 인수 기준을 SPEC.md 에 되먹이고 루프
 ```
 
+`/spec` 은 열린 질문이 모두 소진되면 `spec-ambiguity-evaluator` 서브에이전트로
+모호성 점검을 자동 수행하고, Ambiguity <= 0.2 일 때만 `frozen` 으로 전환한다.
+
 ## 3단계 평가 게이트 (비용 순서)
 
 - **Stage 1 — Mechanical ($0):** 테스트·린트·타입체크·빌드. 통과 못 하면 여기서 멈춘다.
   LLM 토큰을 쓰기 전에 기계가 먼저 거른다.
 - **Stage 2 — Semantic:** `spec-evaluator` 서브에이전트로 각 인수 기준 충족 여부를 근거와 함께 판정.
 - **Stage 3 — Consensus (선택):** 고위험이거나 Stage 2가 불확실할 때만 다른 모델로 교차 검증.
-
-## 모호성 게이트
-
-정량 확인이 필요하면 `python3 ~/.claude/scripts/ambiguity_score.py SPEC.md`
-(임계값: Ambiguity ≤ 0.2 → frozen 가능).

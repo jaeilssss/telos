@@ -37,9 +37,9 @@ bash install.sh all
   skills/impl/SKILL.md      /impl  — 모델 선택 후 서브에이전트 구현
   skills/eval/SKILL.md      /eval  — 3단계 평가 게이트
   agents/spec-evaluator.md  Stage 2 의미 평가 (Sonnet)
+  agents/spec-ambiguity-evaluator.md  /spec 자동 모호성 점검 (Haiku)
   settings.json             PostToolUse 훅
   scripts/spec_gate.py      $0 게이트 (작업 중인 프로젝트의 SPEC.md 를 확인)
-  scripts/ambiguity_score.py (선택) 모호성 자동 채점 (Haiku)
 ```
 
 > 기존에 `~/.claude/CLAUDE.md` 나 `settings.json` 이 있으면 install.sh 가 덮어쓰지 않는다.
@@ -70,6 +70,7 @@ bash install.sh all
 
 ```
 $spec  "주문 목록 API 를 만들고 싶어"   # 질문으로 모호함 제거 → 프로젝트 루트에 SPEC.md 생성
+$spec  # open questions 소진 후 자동 모호성 점검 → 기준 통과 시 frozen
 $impl                                   # SPEC.md 기준 구현
 $eval                                   # 인수 기준 채점
 # 실패 항목 되먹이고 $impl → $eval … 수렴까지 반복
@@ -89,21 +90,21 @@ SPEC.md 는 **각 프로젝트 루트**에 생긴다.
   프로젝트 설정이 우선한다.
 - Codex 설치판을 빼려면 `codex plugin remove telos` 실행 후 `~/plugins/telos`와
   `~/.agents/plugins/marketplace.json`의 해당 entry를 제거한다.
-- Claude Code 설치판을 완전히 빼려면: `~/.claude/skills/{spec,impl,eval}/`, `~/.claude/agents/spec-evaluator.md`,
-  `~/.claude/scripts/{spec_gate,ambiguity_score}.py`, `SPEC.template.md` 삭제 +
+- Claude Code 설치판을 완전히 빼려면: `~/.claude/skills/{spec,impl,eval}/`, `~/.claude/agents/{spec-evaluator,spec-ambiguity-evaluator}.md`,
+  `~/.claude/scripts/spec_gate.py`, `SPEC.template.md` 삭제 +
   `settings.json` 의 해당 훅 제거 + CLAUDE.md 의 appended 블록 삭제.
 
 ## 토큰 비용 레버
 
 - Stage 1(테스트·린트)은 LLM 0원으로 먼저 거른다.
-- 채점 Haiku / 의미 평가 Sonnet / Opus 는 정말 어려운 추론에만.
+- 모호성 점검 Haiku / 의미 평가 Sonnet / Opus 는 정말 어려운 추론에만.
 - Consensus 기본 OFF, 고위험·불확실 시에만.
 - 무한 진화 루프 없음 — 간단한 작업엔 가볍게.
 
 ## 커스터마이즈
 
 - Claude Code: `~/.claude/skills/eval/SKILL.md` 의 Stage 1 명령을 본인 스택 명령으로 교체.
-- `~/.claude/agents/spec-evaluator.md` 의 `model:` 티어 조정.
+- `~/.claude/agents/spec-evaluator.md` 와 `~/.claude/agents/spec-ambiguity-evaluator.md` 의 `model:` 티어 조정.
 - 게이트를 강제 차단형으로 바꾸려면 `spec_gate.py` 가 exit code 로 거부하도록 수정(주의).
 - Codex: `~/plugins/telos/skills/{spec,impl,eval}/SKILL.md` 를 수정한 뒤
   `codex plugin add telos@personal`로 다시 설치.

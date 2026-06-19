@@ -21,6 +21,7 @@ fi
 for legacy in spec impl eval; do
   rm -f "$DEST/commands/${legacy}.md"
 done
+rm -f "$DEST/scripts/ambiguity_score.py"
 
 # ── 2. 파일 설치 ────────────────────────────────────────────────────────────
 mkdir -p "$DEST/skills" "$DEST/agents" "$DEST/scripts"
@@ -35,8 +36,8 @@ echo "• skills / agents / scripts / SPEC.template.md 설치 완료"
 # ── 3. 매니페스트 기록 ──────────────────────────────────────────────────────
 {
   find "$DEST/skills/spec" "$DEST/skills/impl" "$DEST/skills/eval" -type f
-  find "$DEST/agents" -name "spec-evaluator.md"
-  find "$DEST/scripts" -name "spec_gate.py" -o -name "ambiguity_score.py"
+  find "$DEST/agents" \( -name "spec-evaluator.md" -o -name "spec-ambiguity-evaluator.md" \)
+  find "$DEST/scripts" -name "spec_gate.py"
   echo "$DEST/SPEC.template.md"
 } > "$MANIFEST"
 echo "• 매니페스트 기록: $MANIFEST"

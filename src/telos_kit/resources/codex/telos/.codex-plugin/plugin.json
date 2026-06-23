@@ -1,6 +1,6 @@
 {
   "name": "telos",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Global Codex plugin for spec-first development using SPEC.md as the implementation contract.",
   "author": {
     "name": "Telos"

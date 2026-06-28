@@ -29,8 +29,12 @@ class InstallerTests(unittest.TestCase):
             }),
             encoding="utf-8",
         )
+        stale_cache = self.home / ".codex" / "plugins" / "cache" / "personal" / "telos" / "0.3.0"
+        current_cache = self.home / ".codex" / "plugins" / "cache" / "personal" / "telos" / __version__
+        stale_cache.mkdir(parents=True)
+        current_cache.mkdir(parents=True)
 
-        install_codex(self.home, "/opt/python")
+        messages = install_codex(self.home, "/opt/python")
         install_codex(self.home, "/opt/python")
 
         plugin = self.home / "plugins" / "telos"
@@ -44,7 +48,11 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(catalog["interface"]["displayName"], "Mine")
         self.assertEqual([item["name"] for item in catalog["plugins"]], ["other", "telos"])
         version = json.loads((plugin / ".telos-version.json").read_text(encoding="utf-8"))
-        self.assertEqual(version, {"package": __version__, "target": "codex", "version": "0.4.0"})
+        self.assertEqual(version, {"package": __version__, "target": "codex", "version": __version__})
+        self.assertFalse(stale_cache.exists())
+        self.assertTrue(current_cache.exists())
+        self.assertIn("Pruned stale Codex Telos cache versions: 0.3.0", messages)
+        self.assertEqual(messages[-1], "Restart Codex completely before using Telos again.")
 
     @patch("telos_kit.installers.shutil.which", return_value=None)
     def test_claude_install_uses_plugin_hooks_without_user_hook(self, _which) -> None:

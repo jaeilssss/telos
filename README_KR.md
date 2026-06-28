@@ -71,7 +71,7 @@ Codex 플러그인은 다음 위치에 설치됩니다.
 ~/.agents/plugins/marketplace.json
 ```
 
-설치 후에는 새 Codex 스레드를 시작하고 `/hooks`에서 Telos 훅을 검토하세요.
+설치나 업데이트 후에는 Codex를 완전히 재시작한 다음 `/hooks`에서 Telos 훅을 검토하세요.
 
 Codex에서의 명령 표면:
 

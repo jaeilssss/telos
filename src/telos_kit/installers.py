@@ -86,6 +86,20 @@ def _configure_codex_hook(plugin: Path, python_executable: str) -> None:
     _write_json(hook_path, data)
 
 
+def _prune_codex_cache(home: Path, version: str) -> list[str]:
+    cache_root = home / ".codex" / "plugins" / "cache" / "personal" / PLUGIN_NAME
+    if not cache_root.exists():
+        return []
+
+    removed = []
+    for child in cache_root.iterdir():
+        if not child.is_dir() or child.name == version:
+            continue
+        shutil.rmtree(child)
+        removed.append(child.name)
+    return sorted(removed)
+
+
 def install_codex(home: Path, python_executable: str) -> list[str]:
     versions = _versions()
     source = RESOURCE_ROOT / "codex" / PLUGIN_NAME
@@ -99,6 +113,7 @@ def install_codex(home: Path, python_executable: str) -> list[str]:
     _write_json(manifest_path, manifest)
     _configure_codex_hook(destination, python_executable)
     _write_install_version(destination, "codex", versions["codex"])
+    pruned_versions = _prune_codex_cache(home, versions["codex"])
 
     catalog = _read_json(
         marketplace,
@@ -122,10 +137,15 @@ def install_codex(home: Path, python_executable: str) -> list[str]:
         f"Codex plugin copied to {destination}",
         f"Codex marketplace updated at {marketplace}",
     ]
+    if pruned_versions:
+        messages.append(
+            "Pruned stale Codex Telos cache versions: " + ", ".join(pruned_versions)
+        )
     codex = shutil.which("codex")
     plugin_id = f"{PLUGIN_NAME}@{catalog['name']}"
     if not codex:
         messages.append(f"WARNING: Codex CLI not found; run `codex plugin add {plugin_id}` later.")
+        messages.append("Restart Codex completely before using Telos again.")
         return messages
 
     command = [codex, "plugin", "add", plugin_id]
@@ -134,7 +154,7 @@ def install_codex(home: Path, python_executable: str) -> list[str]:
         messages.append(f"WARNING: {_command_failure(command, result)}")
     else:
         messages.append(f"Codex plugin installed: {plugin_id}")
-    messages.append("Start a new Codex thread and review the Telos hook with /hooks.")
+    messages.append("Restart Codex completely before using Telos again, then review the Telos hook with /hooks.")
     return messages
 
 

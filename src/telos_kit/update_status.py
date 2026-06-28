@@ -31,7 +31,35 @@ def _installed_version_path(home: Path, target: str) -> Path:
     return home / ".telos" / "claude-marketplace" / "plugins" / PLUGIN_NAME / ".telos-version.json"
 
 
-def get_update_status(target: str, *, project_root: Path, home: Path | None = None) -> dict[str, str | bool | None]:
+def _codex_cache_versions(home: Path) -> list[str]:
+    root = home / ".codex" / "plugins" / "cache" / "personal" / PLUGIN_NAME
+    if not root.exists():
+        return []
+    return sorted(
+        child.name
+        for child in root.iterdir()
+        if child.is_dir()
+    )
+
+
+def _codex_cache_has_skill(home: Path, version: str) -> bool:
+    skill = (
+        home
+        / ".codex"
+        / "plugins"
+        / "cache"
+        / "personal"
+        / PLUGIN_NAME
+        / version
+        / "skills"
+        / "spec"
+        / "SKILL.md"
+    )
+    return skill.exists()
+
+
+def get_update_status(target: str, *, project_root: Path, home: Path | None = None) -> dict[str, object]:
+    selected_home = (home or Path.home()).expanduser()
     kit_versions = _read_json(project_root / "src" / "telos_kit" / "kit_versions.json")
     if not kit_versions:
         return {
@@ -52,8 +80,18 @@ def get_update_status(target: str, *, project_root: Path, home: Path | None = No
             "update_available": False,
         }
 
-    installed = _read_json(_installed_version_path((home or Path.home()).expanduser(), target))
+    cache_versions = _codex_cache_versions(selected_home) if target == "codex" else []
+    installed = _read_json(_installed_version_path(selected_home, target))
     if not installed:
+        if target == "codex" and cache_versions:
+            return {
+                "target": target,
+                "status": "cache-only",
+                "installed_version": None,
+                "latest_version": latest,
+                "update_available": False,
+                "cache_versions": cache_versions,
+            }
         return {
             "target": target,
             "status": "not-installed",
@@ -82,6 +120,15 @@ def get_update_status(target: str, *, project_root: Path, home: Path | None = No
             "latest_version": latest,
             "update_available": False,
         }
+    if target == "codex" and cache_versions and not _codex_cache_has_skill(selected_home, current):
+        return {
+            "target": target,
+            "status": "cache-stale",
+            "installed_version": current,
+            "latest_version": latest,
+            "update_available": False,
+            "cache_versions": cache_versions,
+        }
     if current_parts >= latest_parts:
         return {
             "target": target,
@@ -102,6 +149,19 @@ def get_update_status(target: str, *, project_root: Path, home: Path | None = No
 
 def get_update_notice(target: str, *, project_root: Path, home: Path | None = None) -> str | None:
     status = get_update_status(target, project_root=project_root, home=home)
+    if status["status"] == "cache-only":
+        versions = ", ".join(status["cache_versions"])
+        return (
+            f"점검 필요: Codex가 Telos 캐시 버전 {versions}을(를) 가지고 있지만 "
+            "설치 기록 파일은 찾지 못했습니다. 이전 설치 흔적이나 stale session일 수 있습니다. "
+            "`telos update codex`를 실행하고 Codex를 완전히 재시작하세요."
+        )
+    if status["status"] == "cache-stale":
+        current = status["installed_version"]
+        return (
+            f"점검 필요: 설치된 Telos codex 플러그인 버전 {current}의 Codex 캐시가 없거나 "
+            "불완전합니다. `telos update codex`를 실행하고 Codex를 완전히 재시작하세요."
+        )
     if status["status"] != "update-available":
         return None
 

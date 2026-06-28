@@ -71,7 +71,7 @@ Telos installs the Codex plugin into:
 ~/.agents/plugins/marketplace.json
 ```
 
-After installation, start a new Codex thread and review the Telos hook with `/hooks`.
+After installation or update, restart Codex completely and review the Telos hook with `/hooks`.
 
 Codex command surface:
 
